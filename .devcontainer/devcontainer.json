@@ -1,0 +1,21 @@
+{
+    "name": "Room of Requirement - Review Lab",
+    "image": "ghcr.io/joshyorko/room-of-requirement:wolfi",
+    "remoteUser": "vscode",
+    "privileged": true,
+    "overrideCommand": false,
+    "containerEnv": {
+        "DEV_CONTAINERS_SKIP_GCOMPAT_INSTALL": "true",
+        "HOMEBREW_NO_ANALYTICS": "1",
+        "REVIEW_UPSTREAM_REF": "main"
+    },
+    "remoteEnv": {
+        "SHELL": "/bin/zsh",
+        "HOMEBREW_NO_ANALYTICS": "1"
+    },
+    "postCreateCommand": [
+    "/bin/bash",
+    "-lc",
+    "set -euo pipefail; export PATH=\"/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH\"; echo '==> Installing GitHub CLI and gocryptfs'; brew install gh gocryptfs; echo '==> Trusting Josh Review dev tap'; brew trust --tap joshyorko/review-dev; brew tap joshyorko/review-dev; brew update; echo '==> Installing latest Bluefin Review dev package'; brew install joshyorko/review-dev/bluefin-review-dev; echo '==> Preparing Review source checkout from upstream main'; mkdir -p \"$HOME/src\"; if [ ! -d \"$HOME/src/review/.git\" ]; then git clone https://github.com/joshyorko/review.git \"$HOME/src/review\"; fi; cd \"$HOME/src/review\"; git remote get-url upstream >/dev/null 2>&1 || git remote add upstream https://github.com/projectbluefin/review.git; git fetch upstream main; git switch -C main upstream/main; if ! command -v fuse2fs >/dev/null 2>&1; then echo '==> Building fuse2fs for Wolfi'; sudo apk add --no-cache build-base git pkgconf fuse3-dev linux-headers autoconf automake libtool; tmp=\"$(mktemp -d)\"; git clone --depth 1 https://github.com/tytso/e2fsprogs.git \"$tmp/e2fsprogs\"; mkdir -p \"$tmp/e2fsprogs/build\"; cd \"$tmp/e2fsprogs/build\"; ../configure; make -j\"$(nproc)\"; sudo install -m 0755 ./misc/fuse2fs /usr/local/bin/fuse2fs; rm -rf \"$tmp\"; fi; echo; echo '=== Review source ==='; git -C \"$HOME/src/review\" log -1 --oneline; echo; echo '=== Installed Review package ==='; brew list --versions joshyorko/review-dev/bluefin-review-dev; echo; echo '=== Review runtime ==='; command -v gh; command -v apptainer; command -v squashfuse; command -v gocryptfs; command -v fuse2fs; command -v bluefin; echo; if [ -e /dev/fuse ]; then echo '/dev/fuse: READY'; else echo 'WARNING: /dev/fuse is missing'; fi; if [ -e /dev/kvm ]; then echo '/dev/kvm: READY'; else echo 'WARNING: /dev/kvm is missing'; fi; echo; echo 'Bootstrap complete.'; echo 'Next: gh auth login'; echo 'Review source: ~/src/review (upstream/main)'; echo 'Run: bluefin review projectbluefin/review'"
+    ]
+}
