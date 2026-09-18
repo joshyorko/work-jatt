@@ -13,9 +13,11 @@ if command -v code-insiders >/dev/null 2>&1; then
 elif command -v code >/dev/null 2>&1; then
   CODE="code"
 else
-  echo "VS Code CLI (code-insiders or code) was not found; Josh Room was not installed." >&2
+  echo "VS Code CLI (code-insiders or code) was not found on PATH; Josh Room was not installed." >&2
   exit 1
 fi
+
+echo "Using VS Code CLI: $CODE ($(command -v "$CODE"))"
 
 if "$CODE" --list-extensions --show-versions 2>/dev/null | grep -qx "joshyorko.josh-room@${VERSION}"; then
   echo "Josh Room ${VERSION} is already installed."
