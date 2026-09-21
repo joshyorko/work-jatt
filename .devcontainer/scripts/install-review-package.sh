@@ -9,4 +9,4 @@ brew tap joshyorko/review-dev
 brew update
 
 echo '==> Installing latest Bluefin Review dev package'
-brew install joshyorko/review-dev/bluefin-review-dev
+brew install -y joshyorko/review-dev/bluefin-review-dev

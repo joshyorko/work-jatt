@@ -25,7 +25,7 @@
         "/bin/bash",
         "${containerWorkspaceFolder}/.devcontainer/scripts/bootstrap-review.sh"
     ],
-    "postStartCommand": [
+    "postAttachCommand": [
         "/bin/sh",
         "${containerWorkspaceFolder}/.vscode/install-josh-room.sh"
     ]

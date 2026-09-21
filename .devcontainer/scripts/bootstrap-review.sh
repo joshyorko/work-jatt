@@ -2,6 +2,9 @@
 set -euo pipefail
 
 export PATH="/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH}"
+# Homebrew now prompts before installing multiple dependencies; force non-interactive.
+export NONINTERACTIVE=1
+export HOMEBREW_NO_AUTO_UPDATE=1
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 

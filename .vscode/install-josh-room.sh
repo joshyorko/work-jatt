@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-set -eu
+set -u
 
 VERSION="0.1.24"
 URL="https://github.com/joshyorko/josh-room/releases/download/v${VERSION}-standalone-vsix/josh-room-${VERSION}.vsix"
@@ -13,8 +13,9 @@ if command -v code-insiders >/dev/null 2>&1; then
 elif command -v code >/dev/null 2>&1; then
   CODE="code"
 else
-  echo "VS Code CLI (code-insiders or code) was not found on PATH; Josh Room was not installed." >&2
-  exit 1
+  # No editor server attached yet (e.g. run via bare `devcontainer` CLI) - not fatal.
+  echo "VS Code CLI (code-insiders or code) was not found on PATH; skipping Josh Room install." >&2
+  exit 0
 fi
 
 echo "Using VS Code CLI: $CODE ($(command -v "$CODE"))"
@@ -29,7 +30,10 @@ command -v curl >/dev/null 2>&1 || {
   exit 1
 }
 
-curl --fail --location --silent --show-error --output "$VSIX" "$URL"
+curl --fail --location --silent --show-error --output "$VSIX" "$URL" || {
+  echo "Failed to download Josh Room VSIX." >&2
+  exit 1
+}
 
 if command -v sha256sum >/dev/null 2>&1; then
   ACTUAL_SHA256="$(sha256sum "$VSIX" | awk '{print $1}')"
