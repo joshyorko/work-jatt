@@ -4,16 +4,19 @@
 
 This repository runs in a dev container. The lifecycle hooks in
 [.devcontainer/devcontainer.json](.devcontainer/devcontainer.json) install the
-Review tooling after the container is created and install Josh Room every time
-the container starts.
+Review tooling after the container is created, verify or repair the runtime each
+time the container starts, and install Josh Room when an IDE attaches.
 
 The post-create hook delegates to named scripts in
 [.devcontainer/scripts](.devcontainer/scripts), which install the Review
 dependencies, prepare the upstream source checkout, build `fuse2fs` when it is
 missing, and verify the runtime. The post-start hook runs
+[.devcontainer/scripts/ensure-review-runtime.sh](.devcontainer/scripts/ensure-review-runtime.sh),
+which verifies the runtime and reruns the bootstrap only when required state is
+missing. The post-attach hook runs
 [.vscode/install-josh-room.sh](.vscode/install-josh-room.sh), which downloads
 the pinned Josh Room VSIX from its GitHub release, verifies its SHA-256
-checksum, and installs it into the running VS Code server via `code-insiders`
+checksum, and installs it into the attached VS Code server via `code-insiders`
 or `code`.
 
 The bootstrap invokes each setup script through `/bin/bash`, so the lifecycle

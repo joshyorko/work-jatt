@@ -3,6 +3,17 @@ set -euo pipefail
 
 export PATH="/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH}"
 
+require_environment() {
+  local variable_name="$1"
+
+  if [ -n "${!variable_name:-}" ]; then
+    printf '%-36s %s\n' "${variable_name}:" "${!variable_name}"
+  else
+    echo "ERROR: required devcontainer environment variable is missing: ${variable_name}" >&2
+    return 2
+  fi
+}
+
 require_command() {
   local command_name="$1"
 
@@ -13,6 +24,17 @@ require_command() {
     return 1
   fi
 }
+
+printf '\n=== Dev container environment ===\n'
+for variable_name in \
+  DEV_CONTAINERS_SKIP_GCOMPAT_INSTALL \
+  HOMEBREW_NO_ANALYTICS \
+  REVIEW_UPSTREAM_REF \
+  BLUEFIN_REVIEW_INHERIT_OMP_CONFIG \
+  LUNA_FACTORY_ENABLED \
+  LUNA_FACTORY_CAPACITY; do
+  require_environment "${variable_name}"
+done
 
 printf '\n=== Review source ===\n'
 git -C "${HOME}/src/review" log -1 --oneline
@@ -36,7 +58,7 @@ if [ -e /dev/kvm ]; then
 else
   echo 'WARNING: /dev/kvm is missing'
 fi
-printf '\nBootstrap complete.\n'
+printf '\nReview runtime check complete.\n'
 echo 'Next: gh auth login'
 echo 'Review source: ~/src/review (upstream/main)'
 echo 'Run: bluefin review projectbluefin/review'
