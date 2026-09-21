@@ -2,9 +2,10 @@
 set -eu
 
 VERSION="0.1.24"
-URL="https://github.com/joshyorko/josh-room/releases/download/v${VERSION}-standalone-vsix/josh-room-${VERSION}.vsix"
-EXPECTED_SHA256="c2768bf96edf70f4cd8b187754d89d6ea84a59afb7634224a6830873b0e48e7d"
-VSIX="${TMPDIR:-/tmp}/josh-room-${VERSION}.vsix"
+VSIX="/home/vscode/.cache/josh-room/josh-room-${VERSION}.vsix"
+
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+/bin/bash "${SCRIPT_DIR}/../.devcontainer/scripts/stage-josh-room.sh"
 
 CODE_CLIS=""
 if command -v code-insiders >/dev/null 2>&1; then
@@ -15,9 +16,8 @@ if command -v code >/dev/null 2>&1; then
 fi
 
 if [ -z "${CODE_CLIS}" ]; then
-  # No editor server attached yet (e.g. run via bare `devcontainer` CLI) - not fatal.
-  echo "VS Code CLI (code-insiders or code) was not found on PATH; skipping Josh Room install." >&2
-  exit 0
+  echo "VS Code CLI (code-insiders or code) was not found on PATH; run this helper after attaching to VS Code." >&2
+  exit 1
 fi
 
 for CODE in ${CODE_CLIS}; do
@@ -27,28 +27,6 @@ for CODE in ${CODE_CLIS}; do
     exit 0
   fi
 done
-
-command -v curl >/dev/null 2>&1 || {
-  echo "curl is required to install Josh Room." >&2
-  exit 1
-}
-
-curl --fail --location --silent --show-error --output "$VSIX" "$URL" || {
-  echo "Failed to download Josh Room VSIX." >&2
-  exit 1
-}
-
-if command -v sha256sum >/dev/null 2>&1; then
-  ACTUAL_SHA256="$(sha256sum "$VSIX" | awk '{print $1}')"
-else
-  ACTUAL_SHA256="$(shasum -a 256 "$VSIX" | awk '{print $1}')"
-fi
-
-if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
-  echo "Josh Room VSIX checksum verification failed." >&2
-  rm -f "$VSIX"
-  exit 1
-fi
 
 for CODE in ${CODE_CLIS}; do
   echo "Installing Josh Room ${VERSION} with ${CODE}."

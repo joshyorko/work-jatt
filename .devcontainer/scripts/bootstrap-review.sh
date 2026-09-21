@@ -21,6 +21,7 @@ run_script install-review-tools.sh
 run_script install-review-package.sh
 run_script prepare-review-source.sh
 run_script build-fuse2fs.sh
+run_script stage-josh-room.sh
 run_script check-review-runtime.sh
 
 # Optional Headroom-backed OMP profile; disabled until it is needed.

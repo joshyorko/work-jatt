@@ -1,4 +1,5 @@
 {
+    "$schema": "../.vscode/devsy-devcontainer.schema.json",
     "name": "Room of Requirement - Review Lab",
     "image": "ghcr.io/joshyorko/room-of-requirement:wolfi",
     "remoteUser": "vscode",
@@ -21,6 +22,14 @@
         "SHELL": "/bin/zsh",
         "HOMEBREW_NO_ANALYTICS": "1"
     },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "/home/vscode/.cache/josh-room/josh-room-0.1.24.vsix"
+            ]
+        }
+    },
+    "waitFor": "postStartCommand",
     "postCreateCommand": [
         "/bin/bash",
         "${containerWorkspaceFolder}/.devcontainer/scripts/bootstrap-review.sh"
@@ -28,9 +37,5 @@
     "postStartCommand": [
         "/bin/bash",
         "${containerWorkspaceFolder}/.devcontainer/scripts/ensure-review-runtime.sh"
-    ],
-    "postAttachCommand": [
-        "/bin/sh",
-        "${containerWorkspaceFolder}/.vscode/install-josh-room.sh"
     ]
 }
