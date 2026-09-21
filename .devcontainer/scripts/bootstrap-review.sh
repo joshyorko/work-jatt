@@ -3,10 +3,23 @@ set -euo pipefail
 
 export PATH="/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH}"
 
-SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-"${SCRIPT_DIR}/install-review-tools.sh"
-"${SCRIPT_DIR}/install-review-package.sh"
-"${SCRIPT_DIR}/prepare-review-source.sh"
-"${SCRIPT_DIR}/build-fuse2fs.sh"
-"${SCRIPT_DIR}/check-review-runtime.sh"
+run_script() {
+	local script_name="$1"
+
+	echo "==> Running ${script_name}"
+	/bin/bash "${SCRIPT_DIR}/${script_name}"
+}
+
+# Invoke child scripts through Bash instead of relying on executable bits. This
+# also works when the workspace was checked out with scripts tracked as 0644.
+run_script install-review-tools.sh
+run_script install-review-package.sh
+run_script prepare-review-source.sh
+run_script build-fuse2fs.sh
+run_script check-review-runtime.sh
+
+# Optional Headroom-backed OMP profile; disabled until it is needed.
+# Set HEADROOM_BASE_URL in devcontainer.json and uncomment this line to enable.
+# run_script configure-omp-headroom.sh
