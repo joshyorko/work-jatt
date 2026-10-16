@@ -5,6 +5,7 @@ SCRIPT_DIR="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
 # shellcheck source=.devcontainer/josh-room.env
 . "${SCRIPT_DIR}/../.devcontainer/josh-room.env"
 VSIX="${JOSH_ROOM_CACHE_DIR:-${HOME}/.cache/josh-room}/josh-room-${VERSION}.vsix"
+/bin/bash "${SCRIPT_DIR}/../.devcontainer/scripts/prepare-vscode-extensions.sh"
 /bin/bash "${SCRIPT_DIR}/../.devcontainer/scripts/stage-josh-room.sh"
 
 CODE_CLIS=""
@@ -20,9 +21,14 @@ if [ -z "${CODE_CLIS}" ]; then
   exit 1
 fi
 
+is_installed() {
+  extensions="$("$1" --list-extensions --show-versions)" || return 1
+  printf '%s\n' "${extensions}" | grep -Fx "joshyorko.josh-room@${VERSION}" >/dev/null
+}
+
 for CODE in ${CODE_CLIS}; do
   echo "Checking VS Code CLI: ${CODE} ($(command -v "${CODE}"))"
-  if "${CODE}" --list-extensions --show-versions 2>/dev/null | grep -qx "joshyorko.josh-room@${VERSION}"; then
+  if is_installed "${CODE}" 2>/dev/null; then
     echo "Josh Room ${VERSION} is already installed."
     exit 0
   fi
@@ -30,11 +36,12 @@ done
 
 for CODE in ${CODE_CLIS}; do
   echo "Installing Josh Room ${VERSION} with ${CODE}."
-  if "${CODE}" --install-extension "$VSIX" --force; then
+  if "${CODE}" --install-extension "$VSIX" --force &&
+    is_installed "${CODE}"; then
     echo "Installed Josh Room ${VERSION} from GitHub using ${CODE}."
     exit 0
   fi
-  echo "VS Code CLI ${CODE} could not install Josh Room; trying the next CLI." >&2
+  echo "VS Code CLI ${CODE} did not confirm Josh Room ${VERSION}; trying the next CLI." >&2
 done
 
 echo "Failed to install Josh Room with the available VS Code CLI(s)." >&2

@@ -17,6 +17,7 @@ run_script() {
 
 # Invoke child scripts through Bash instead of relying on executable bits. This
 # also works when the workspace was checked out with scripts tracked as 0644.
+run_script prepare-vscode-extensions.sh
 run_script install-review-tools.sh
 run_script install-review-package.sh
 run_script prepare-review-source.sh
