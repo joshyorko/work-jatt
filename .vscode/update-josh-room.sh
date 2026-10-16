@@ -1,19 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [ "$#" -lt 1 ] || [ "$#" -gt 2 ]; then
-  echo 'Usage: bash .vscode/update-josh-room.sh VERSION [SHA256]' >&2
+if [ "$#" -gt 2 ]; then
+  echo 'Usage: bash .vscode/update-josh-room.sh [VERSION [SHA256]]' >&2
   exit 1
 fi
 
-VERSION="${1#v}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+if [ "$#" -eq 0 ]; then
+  LATEST_URL="$(curl --fail --location --silent --show-error --output /dev/null --write-out '%{url_effective}' https://github.com/joshyorko/josh-room/releases/latest)"
+  VERSION="${LATEST_URL##*/}"
+else
+  VERSION="${1#v}"
+fi
+VERSION="${VERSION#v}"
 VERSION="${VERSION%-standalone-vsix}"
 if [[ ! "${VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   echo 'ERROR: expected a version such as 0.1.26 or v0.1.26-standalone-vsix.' >&2
   exit 1
 fi
 
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 PIN_FILE="${SCRIPT_DIR}/../.devcontainer/josh-room.env"
 if [ "$#" -eq 2 ]; then
   EXPECTED_SHA256="$2"

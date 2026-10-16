@@ -27,14 +27,19 @@ class JoshRoomUpdateTests(unittest.TestCase):
         self.bin = self.root / "bin"
         self.bin.mkdir()
         self.env = dict(os.environ, JOSH_ROOM_CACHE_DIR=str(self.cache),
-                        PATH=f"{self.bin}:{os.environ['PATH']}",
-                        TEST_DIGEST=DIGEST, TEST_PAYLOAD=PAYLOAD.decode())
+                PATH=f"{self.bin}:{os.environ['PATH']}",
+                TEST_DIGEST=DIGEST, TEST_PAYLOAD=PAYLOAD.decode(),
+                TEST_VERSION="0.1.99", TEST_LATEST_VERSION="0.1.99")
         curl = self.bin / "curl"
         curl.write_text('''#!/usr/bin/env bash
 set -euo pipefail
 for arg in "$@"; do
+  if [[ "$arg" == */releases/latest ]]; then
+    printf 'https://github.com/joshyorko/josh-room/releases/tag/v%s-standalone-vsix' "$TEST_LATEST_VERSION"
+    exit 0
+  fi
   if [[ "$arg" == */SHA256SUMS ]]; then
-    printf '%s  josh-room-0.1.99.vsix\\n' "$TEST_DIGEST"
+    printf '%s  josh-room-%s.vsix\\n' "$TEST_DIGEST" "$TEST_VERSION"
     exit 0
   fi
 done
@@ -68,6 +73,12 @@ exit 22
         result = self.run_script(".devcontainer/scripts/stage-josh-room.sh")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(stable.read_bytes(), PAYLOAD)
+
+    def test_no_version_selects_latest_release(self):
+        result = self.update()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('VERSION="0.1.99"', self.pin.read_text())
+        self.assertEqual((self.cache / "josh-room-0.1.99.vsix").read_bytes(), PAYLOAD)
 
     def test_explicit_checksum_and_corrupt_cache_repair(self):
         self.cache.mkdir()
