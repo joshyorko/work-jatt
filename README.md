@@ -31,12 +31,12 @@ inside the devcontainer:
 
 To pin a specific release instead, pass its version:
 
-    bash .vscode/update-josh-room.sh 0.1.34
+    bash .vscode/update-josh-room.sh 0.1.35
 
 The updater reads the release's `SHA256SUMS`, downloads and verifies the VSIX,
 and only then changes the pin. You can also pass a known SHA-256 as the second
 argument. The devcontainer extension path stays the same across releases. The
-current pin is Josh Room 0.1.34.
+current pin is Josh Room 0.1.35.
 Staging uses the current user's `~/.cache/josh-room`; set
 `JOSH_ROOM_CACHE_DIR` to override it.
 
