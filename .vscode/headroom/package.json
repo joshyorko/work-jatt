@@ -1,0 +1,19 @@
+{
+  "name": "work-jatt-headroom",
+  "displayName": "Work Jatt Headroom Setup",
+  "description": "Prompt for the Headroom proxy token in VS Code and configure the connected container.",
+  "publisher": "joshyorko",
+  "version": "0.1.0",
+  "engines": { "vscode": "^1.85.0" },
+  "main": "./extension.js",
+  "extensionKind": ["workspace"],
+  "activationEvents": ["onStartupFinished"],
+  "capabilities": { "untrustedWorkspaces": { "supported": false } },
+  "contributes": {
+    "commands": [{
+      "command": "workJatt.updateHeadroomToken",
+      "title": "Update Proxy Token",
+      "category": "Headroom"
+    }]
+  }
+}

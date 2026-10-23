@@ -137,11 +137,13 @@ exit 22
         stable.unlink()
         check = self.root / ".devcontainer/scripts/check-review-runtime.sh"
         check.write_text("#!/usr/bin/env bash\nexit 0\n")
+        (check.parent / "configure-headroom.sh").write_text("#!/usr/bin/env bash\nexit 0\n")
         result = self.run_script(".devcontainer/scripts/ensure-review-runtime.sh")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue((self.home / ".vscode-server/extensions").is_dir())
         self.assertTrue((self.home / ".vscode-server-insiders/extensions").is_dir())
         self.assertEqual(stable.read_bytes(), PAYLOAD)
+        self.assertTrue((self.home / ".cache/headroom/work-jatt-headroom.vsix").is_file())
 
     def test_missing_devcontainer_environment_leaves_home_untouched(self):
         self.env.pop("DEV_CONTAINERS_SKIP_GCOMPAT_INSTALL", None)
@@ -293,7 +295,7 @@ echo 'joshyorko.josh-room@0.1.99' > "$HOME/registry-code-insiders"''')
         shutil.copy2(ROOT / ".devcontainer/scripts/bootstrap-review.sh",
                      scripts / "bootstrap-review.sh")
         for name in ("install-review-package", "prepare-review-source", "build-fuse2fs",
-                     "configure-omp-headroom", "check-review-runtime"):
+                     "configure-headroom", "check-review-runtime"):
             (scripts / f"{name}.sh").write_text("#!/usr/bin/env bash\nexit 0\n")
         (scripts / "install-review-tools.sh").write_text('''#!/usr/bin/env bash
 test -d "$HOME/.vscode-server/extensions" &&

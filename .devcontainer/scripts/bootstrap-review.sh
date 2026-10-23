@@ -23,7 +23,8 @@ run_script install-review-package.sh
 run_script prepare-review-source.sh
 run_script build-fuse2fs.sh
 run_script stage-josh-room.sh
+python3 "${SCRIPT_DIR}/stage-headroom-extension.py"
 
-# Configure the Headroom-backed OMP profile.
-run_script configure-omp-headroom.sh
+# Keep proxy authentication separate from each client's OpenAI login.
+run_script configure-headroom.sh
 run_script check-review-runtime.sh

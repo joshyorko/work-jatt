@@ -20,12 +20,14 @@
     },
     "remoteEnv": {
         "SHELL": "/bin/zsh",
+        "PATH": "/home/vscode/.local/bin:${containerEnv:PATH}",
         "HOMEBREW_NO_ANALYTICS": "1"
     },
     "customizations": {
         "vscode": {
             "extensions": [
-                "/home/vscode/.cache/josh-room/josh-room.vsix"
+                "/home/vscode/.cache/josh-room/josh-room.vsix",
+                "/home/vscode/.cache/headroom/work-jatt-headroom.vsix"
             ]
         }
     },
