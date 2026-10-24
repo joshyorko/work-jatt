@@ -10,7 +10,7 @@ Devsy then installs the staged VSIX through its VS Code customization lifecycle.
 
 The post-create hook delegates to named scripts in
 [.devcontainer/scripts](.devcontainer/scripts), which install the Review
-dependencies, prepare the upstream source checkout, build `fuse2fs` when it is
+dependencies and the Homebrew Review package, build `fuse2fs` when it is
 missing, and verify the runtime. The post-start hook runs
 [.devcontainer/scripts/ensure-review-runtime.sh](.devcontainer/scripts/ensure-review-runtime.sh),
 which verifies the runtime and reruns the bootstrap only when required state is
@@ -47,8 +47,7 @@ the final check reports a clear error if a required command is still missing.
 The stable Review package is installed or upgraded from the
 `joshyorko/tools/review` Homebrew formula.
 Run `review owner/repo` with an explicit GitHub repository scope, or
-`review org:your-org` for an organization. The source checkout tracks
-[`joshyorko/review`](https://github.com/joshyorko/review) on `main`.
+`review org:your-org` for an organization. No Review source checkout is required.
 Review inherits the shared OMP configuration and configures the Headroom provider
 through `configure-headroom.sh`. The bootstrap also installs Codex using
 [OpenAI's standalone installer](https://learn.chatgpt.com/docs/codex/cli),
@@ -56,11 +55,9 @@ noninteractively, into the persistent home volume. Startup verifies the managed
 binary and launcher, so a preinstalled Homebrew or npm Codex does not satisfy
 that check. New IDE terminals prefer `~/.local/bin`.
 
-The source updater is safe to rerun: compatible checkouts with local changes or
-diverged branches are left untouched. A checkout with an incompatible remote
-or unrelated Git history is preserved beside the source directory before a
-clean checkout of `joshyorko/review` is installed. It never force-resets or
-discards local work. The Homebrew prefix remains part of the image rather than
+Bootstrap does not create or update a Review source checkout. Existing
+`~/src/review` directories and user data are left untouched.
+The Homebrew prefix remains part of the image rather than
 the persistent `/home/vscode` volume, so a container rebuild may reinstall
 Homebrew packages.
 

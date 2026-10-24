@@ -30,7 +30,6 @@ printf '\n=== Dev container environment ===\n'
 for variable_name in \
   DEV_CONTAINERS_SKIP_GCOMPAT_INSTALL \
   HOMEBREW_NO_ANALYTICS \
-  REVIEW_UPSTREAM_REF \
   REVIEW_INHERIT_OMP_CONFIG \
   HEADROOM_BASE_URL \
   LUNA_FACTORY_ENABLED \
@@ -77,8 +76,6 @@ require_managed_codex() {
   "${launcher}" --version
 }
 
-printf '\n=== Review source ===\n'
-git -C "${HOME}/src/review" log -1 --oneline
 printf '\n=== Installed Review package ===\n'
 brew list --versions joshyorko/tools/review
 printf '\n=== Review runtime ===\n'
@@ -105,5 +102,4 @@ else
 fi
 printf '\nReview runtime check complete.\n'
 echo 'Next: gh auth login'
-echo 'Review source: ~/src/review (upstream/main)'
 echo 'Run: review owner/repo'

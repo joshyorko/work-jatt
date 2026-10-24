@@ -20,7 +20,6 @@ run_script() {
 run_script prepare-vscode-extensions.sh
 run_script install-review-tools.sh
 run_script install-review-package.sh
-run_script prepare-review-source.sh
 run_script build-fuse2fs.sh
 run_script stage-josh-room.sh
 python3 "${SCRIPT_DIR}/stage-headroom-extension.py"

@@ -294,7 +294,7 @@ echo 'joshyorko.josh-room@0.1.99' > "$HOME/registry-code-insiders"''')
         scripts = self.root / ".devcontainer/scripts"
         shutil.copy2(ROOT / ".devcontainer/scripts/bootstrap-review.sh",
                      scripts / "bootstrap-review.sh")
-        for name in ("install-review-package", "prepare-review-source", "build-fuse2fs",
+        for name in ("install-review-package", "build-fuse2fs",
                      "configure-headroom", "check-review-runtime"):
             (scripts / f"{name}.sh").write_text("#!/usr/bin/env bash\nexit 0\n")
         (scripts / "install-review-tools.sh").write_text('''#!/usr/bin/env bash

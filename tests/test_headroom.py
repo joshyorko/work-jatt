@@ -188,7 +188,7 @@ class RuntimeChecksTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.home = Path(self.temp.name)
         guard = self.home / "guard.sh"
-        guard.write_text('''git() { return 0; }
+        guard.write_text('''git() { echo 'unexpected Git dependency' >&2; return 99; }
 brew() { test "$*" = "list --versions joshyorko/tools/review"; }
 apptainer() { return 0; }
 squashfuse() { return 0; }
@@ -201,7 +201,7 @@ gh() { return 0; }
                     if not k.startswith(("HEADROOM_", "CODEX_"))}
         self.env.update(HOME=str(self.home), BASH_ENV=str(guard),
                         DEV_CONTAINERS_SKIP_GCOMPAT_INSTALL="true", HOMEBREW_NO_ANALYTICS="1",
-                        REVIEW_UPSTREAM_REF="main", REVIEW_INHERIT_OMP_CONFIG="1",
+                        REVIEW_INHERIT_OMP_CONFIG="1",
                         HEADROOM_BASE_URL="http://proxy.test/v1", LUNA_FACTORY_ENABLED="0",
                         LUNA_FACTORY_CAPACITY="3")
         self.managed = self.home / ".codex/packages/standalone/current/bin/codex"
@@ -222,6 +222,12 @@ gh() { return 0; }
         self.assertIn("not configured", result.stdout)
         self.assertIn("Run: review owner/repo", result.stdout)
         self.assertNotIn("Headroom headers: configured", result.stdout)
+
+    def test_runtime_passes_without_review_source_checkout(self):
+        self.assertFalse((self.home / "src/review").exists())
+        result = self.run_check()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertNotIn("Review source", result.stdout)
 
     def test_unmanaged_codex_does_not_pass_runtime_check(self):
         self.launcher.unlink()
