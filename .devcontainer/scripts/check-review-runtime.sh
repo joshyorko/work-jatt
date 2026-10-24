@@ -95,11 +95,7 @@ if [ -e /dev/fuse ]; then
 else
   echo 'WARNING: /dev/fuse is missing'
 fi
-if [ -e /dev/kvm ]; then
-  echo '/dev/kvm: READY'
-else
-  echo 'WARNING: /dev/kvm is missing'
-fi
+/bin/bash "$(dirname -- "${BASH_SOURCE[0]}")/check-kvm-runtime.sh"
 printf '\nReview runtime check complete.\n'
 echo 'Next: gh auth login'
 echo 'Run: review owner/repo'

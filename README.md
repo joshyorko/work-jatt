@@ -115,3 +115,54 @@ Existing `HEADROOM_PROXY_TOKEN` environment injection and the helper's terminal
 prompt remain available for automation. If no token is available during
 bootstrap, the IDE still starts so VS Code can ask for it after connecting.
 Runtime checks report configuration only, not an authenticated request.
+
+## Review runtime and KVM
+
+Set `containerEnv.REVIEW_RUNTIME` in `.devcontainer/devcontainer.json` to
+`auto` (the default), `krun`, or `apptainer`, then recreate the devcontainer
+when applying configuration changes. `auto` prefers Podman/krun and retains
+Review's Apptainer fallback. An explicit `review --runtime ...` flag overrides
+this preference. No Review wrapper or replacement package is installed.
+
+Work-Jatt requests `runArgs: ["--device=/dev/kvm"]` alongside its existing
+privileged mode. Devsy v1.24.0's Docker driver passes these arguments to the
+container runtime in
+[`addRunArgs`](https://github.com/devsy-org/devsy/blob/v1.24.0/pkg/driver/docker/runargs.go#L143).
+This applies to the Docker driver, not every Devsy provider. The Linux host
+must provide a working KVM character device and allow the launching container
+runtime to access it. If you choose an Apptainer-only host without `/dev/kvm`,
+also remove the device run argument so Docker can create the container.
+
+The Wolfi image's KVM setup must be published before rebuilding Work-Jatt.
+Its entrypoint registers the **actual device GID** in the container account
+database and adds `vscode` to that group. This is necessary because Devsy's
+[SSH identity setup](https://github.com/devsy-org/devsy/blob/v1.24.0/pkg/ssh/server/exec_identity_unix.go#L207)
+loads groups from the account database; a hardcoded Docker `--group-add` alone
+is insufficient. The image also preserves the user's existing supplementary
+groups through rootless crun/krun using the documented
+[`run.oci.keep_original_groups` annotation](https://github.com/containers/crun/blob/main/crun.1.md#runocikeep_original_groups1).
+Device ownership and modes on the host are never changed.
+
+Bootstrap and each startup report character-device read/write access and
+Podman's krun registration. These are advisory diagnostics, so the IDE and
+automatic fallback remain available. They do not prove VM execution. Neither
+a fresh image build nor real KVM operation has been validated for this change.
+After the updated Wolfi image is published, rebuild through your existing
+Devsy workspace on its host without deleting volumes, then reconnect and run:
+
+```bash
+id
+ls -ln /dev/kvm
+test -c /dev/kvm && test -r /dev/kvm && test -w /dev/kvm
+podman info --runtime=krun --format '{{.Host.OCIRuntime.Name}}'
+podman run --rm --network=none --runtime=krun docker.io/library/alpine:3.22 /bin/echo krun-ok
+podman pull ghcr.io/joshyorko/review:stable
+LUNA_FACTORY_ENABLED=1 review factory-verifier-probe krun ghcr.io/joshyorko/review:stable
+LUNA_FACTORY_ENABLED=1 review --runtime krun joshyorko/review
+bash .devcontainer/scripts/check-review-runtime.sh
+```
+
+Confirm Review reports `runtime=krun` and the packaged Factory verifier returns
+an available receipt. If permissions pass but launch fails, check the runtime's
+supplementary groups, cgroup device policy, and host nested KVM support. Existing
+persistent home data and tool settings must remain in place during recreation.

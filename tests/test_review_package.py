@@ -51,6 +51,8 @@ class ReviewBootstrapTests(unittest.TestCase):
 
     def test_shared_omp_configuration_uses_current_launcher_variable(self):
         config = json.loads((ROOT / ".devcontainer/devcontainer.json").read_text())
+        self.assertEqual(config["runArgs"], ["--device=/dev/kvm"])
+        self.assertEqual(config["containerEnv"]["REVIEW_RUNTIME"], "auto")
         self.assertEqual(config["containerEnv"]["REVIEW_INHERIT_OMP_CONFIG"], "1")
         self.assertEqual(config["containerEnv"]["LUNA_FACTORY_ENABLED"], "1")
         self.assertEqual(config["containerEnv"]["LUNA_FACTORY_CAPACITY"], "3")
