@@ -24,8 +24,8 @@ extension installation happens only after the VS Code server is available.
 
 The version and SHA-256 checksum live in
 [.devcontainer/josh-room.env](.devcontainer/josh-room.env). To update to the
-latest published release, run from the repository root on the Bluefin host or
-inside the devcontainer:
+latest published release, run from the repository root on the host or inside
+the devcontainer:
 
     bash .vscode/update-josh-room.sh
 
@@ -44,7 +44,8 @@ The bootstrap invokes each setup script through `/bin/bash`, so the lifecycle
 does not depend on executable bits being preserved by the workspace checkout.
 The runtime setup installs `gh`, `apptainer`, `squashfuse`, `gocryptfs`, `yq`, and Python 3, and
 the final check reports a clear error if a required command is still missing.
-The stable Review package is installed with `brew install joshyorko/tools/review`.
+The stable Review package is installed or upgraded from the
+`joshyorko/tools/review` Homebrew formula.
 Run `review owner/repo` with an explicit GitHub repository scope, or
 `review org:your-org` for an organization. The source checkout tracks
 [`joshyorko/review`](https://github.com/joshyorko/review) on `main`.
@@ -55,10 +56,13 @@ noninteractively, into the persistent home volume. Startup verifies the managed
 binary and launcher, so a preinstalled Homebrew or npm Codex does not satisfy
 that check. New IDE terminals prefer `~/.local/bin`.
 
-The source updater is safe to rerun: it refuses to touch a checkout with local
-changes or a branch that has diverged from upstream instead of force-resetting
-it. The Homebrew prefix remains part of the image rather than the persistent
-`/home/vscode` volume, so a container rebuild may reinstall Homebrew packages.
+The source updater is safe to rerun: compatible checkouts with local changes or
+diverged branches are left untouched. A checkout with an incompatible remote
+or unrelated Git history is preserved beside the source directory before a
+clean checkout of `joshyorko/review` is installed. It never force-resets or
+discards local work. The Homebrew prefix remains part of the image rather than
+the persistent `/home/vscode` volume, so a container rebuild may reinstall
+Homebrew packages.
 
 Josh Room is not on the Visual Studio Marketplace, so the
 extension is staged locally rather than referenced by a Marketplace ID. To
@@ -67,7 +71,7 @@ install or reinstall it manually after attaching to VS Code, run:
     sh .vscode/install-josh-room.sh
 
 Run the install command inside the attached devcontainer to update its
-extension, or on the Bluefin host to update the host's VS Code installation.
+extension, or on the host to update the host's VS Code installation.
 Reload the VS Code window after installation to load the new version.
 
 The `$schema` entry in `devcontainer.json` points to

@@ -16,7 +16,6 @@
         "REVIEW_INHERIT_OMP_CONFIG": "1",
         "LUNA_FACTORY_ENABLED": "1",
         "LUNA_FACTORY_CAPACITY": "3"
-        //"REVIEW_TEST_KVM_DEVICE": "/dev/bluefin-no-kvm"
     },
     "remoteEnv": {
         "SHELL": "/bin/zsh",
