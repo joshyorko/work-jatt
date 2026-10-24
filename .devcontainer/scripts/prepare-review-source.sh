@@ -13,7 +13,11 @@ if [ ! -d "${REVIEW_DIR}/.git" ]; then
 fi
 
 cd "${REVIEW_DIR}"
-git remote get-url upstream >/dev/null 2>&1 || git remote add upstream https://github.com/projectbluefin/review.git
+if ! git remote get-url upstream >/dev/null 2>&1; then
+  git remote add upstream https://github.com/joshyorko/review.git
+elif [ "$(git remote get-url upstream)" = https://github.com/projectbluefin/review.git ]; then
+  git remote set-url upstream https://github.com/joshyorko/review.git
+fi
 git fetch upstream "${UPSTREAM_REF}"
 
 if [ -n "$(git status --porcelain)" ]; then

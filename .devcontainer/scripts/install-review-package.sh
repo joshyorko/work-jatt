@@ -3,10 +3,10 @@ set -euo pipefail
 
 export PATH="/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH}"
 
-echo '==> Trusting Josh Review dev tap'
-brew trust --tap joshyorko/review-dev
-brew tap joshyorko/review-dev
+echo '==> Trusting Josh tools tap'
+brew trust --tap joshyorko/tools
+brew tap joshyorko/tools
 brew update
 
-echo '==> Installing latest Bluefin Review dev package'
-brew install -y joshyorko/review-dev/bluefin-review-dev
+echo '==> Installing stable Review package'
+brew install joshyorko/tools/review

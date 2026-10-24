@@ -31,7 +31,7 @@ for variable_name in \
   DEV_CONTAINERS_SKIP_GCOMPAT_INSTALL \
   HOMEBREW_NO_ANALYTICS \
   REVIEW_UPSTREAM_REF \
-  BLUEFIN_REVIEW_INHERIT_OMP_CONFIG \
+  REVIEW_INHERIT_OMP_CONFIG \
   HEADROOM_BASE_URL \
   LUNA_FACTORY_ENABLED \
   LUNA_FACTORY_CAPACITY; do
@@ -80,14 +80,14 @@ require_managed_codex() {
 printf '\n=== Review source ===\n'
 git -C "${HOME}/src/review" log -1 --oneline
 printf '\n=== Installed Review package ===\n'
-brew list --versions joshyorko/review-dev/bluefin-review-dev
+brew list --versions joshyorko/tools/review
 printf '\n=== Review runtime ===\n'
 require_command gh
 require_command apptainer
 require_command squashfuse
 require_command gocryptfs
 require_command fuse2fs
-require_command bluefin
+require_command review
 require_command yq
 require_command python3
 require_managed_codex
@@ -106,4 +106,4 @@ fi
 printf '\nReview runtime check complete.\n'
 echo 'Next: gh auth login'
 echo 'Review source: ~/src/review (upstream/main)'
-echo 'Run: bluefin review projectbluefin/review'
+echo 'Run: review owner/repo'

@@ -44,6 +44,10 @@ The bootstrap invokes each setup script through `/bin/bash`, so the lifecycle
 does not depend on executable bits being preserved by the workspace checkout.
 The runtime setup installs `gh`, `apptainer`, `squashfuse`, `gocryptfs`, `yq`, and Python 3, and
 the final check reports a clear error if a required command is still missing.
+The stable Review package is installed with `brew install joshyorko/tools/review`.
+Run `review owner/repo` with an explicit GitHub repository scope, or
+`review org:your-org` for an organization. The source checkout tracks
+[`joshyorko/review`](https://github.com/joshyorko/review) on `main`.
 Review inherits the shared OMP configuration and configures the Headroom provider
 through `configure-headroom.sh`. The bootstrap also installs Codex using
 [OpenAI's standalone installer](https://learn.chatgpt.com/docs/codex/cli),
