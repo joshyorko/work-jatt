@@ -23,14 +23,18 @@ class ReviewBootstrapTests(unittest.TestCase):
                                     env=env, capture_output=True, text=True)
             return result, log.read_text().splitlines()
 
-    def test_install_uses_stable_tap_and_formula(self):
+    def test_install_avoids_whole_tap_validation(self):
         result, calls = self.run_script("install-review-package.sh", '''brew() {
   printf '%s\\n' "$*" >> "$CALL_LOG"
+  if [[ "$1" == tap ]]; then
+    echo "Cannot tap joshyorko/tools: invalid syntax in tap!" >&2
+    return 1
+  fi
 }
 ''')
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(calls, ["trust --tap joshyorko/tools", "tap joshyorko/tools",
-                                 "update", "install joshyorko/tools/review"])
+        self.assertEqual(calls, ["trust --formula joshyorko/tools/review",
+                                 "install joshyorko/tools/review"])
 
     def test_source_migrates_retired_upstream_without_resetting_local_work(self):
         result, calls = self.run_script("prepare-review-source.sh", '''git() {
