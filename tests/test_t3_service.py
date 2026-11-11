@@ -172,17 +172,18 @@ class ProcfsTests(unittest.TestCase):
         scope.start()
         self.addCleanup(scope.stop)
 
-    def start_server(self, listen=True, serve=True):
+    def start_server(self, listen=True, serve=True, extra=None):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
-        prefix = Path(temporary.name)
+        prefix = Path(temporary.name) / "t3code-cli-main"
         entry = prefix / "libexec/dist/bin.mjs"
         entry.parent.mkdir(parents=True)
         entry.touch()
         code = "import socket, time; s=socket.socket(); "
         code += "s.bind(('127.0.0.1', 0)); s.listen(); " if listen else ""
         code += "print('ready', flush=True); time.sleep(30)"
-        process = subprocess.Popen([sys.executable, "-u", "-c", code, str(entry)] + (["serve"] if serve else []),
+        arguments = (["serve"] if serve else []) + (extra or [])
+        process = subprocess.Popen([sys.executable, "-u", "-c", code, str(entry)] + arguments,
                                    stdout=subprocess.PIPE, text=True)
         self.addCleanup(process.stdout.close)
         self.addCleanup(process.wait)
@@ -219,6 +220,55 @@ class ProcfsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Competing T3 server"):
             CHECKS.check("preflight", 0)
         self.assertIsNone(process.poll())
+
+    def test_unrelated_node_entrypoint_is_not_a_t3_server(self):
+        self.assertFalse(CHECKS.is_server(["node", "/workspaces/catalog-api/dist/index.mjs"]))
+        self.assertFalse(CHECKS.is_server(["node", "/workspaces/catalog-api/dist/bin.mjs", "t3"]))
+
+    def test_supported_default_invocations_and_non_server_commands(self):
+        entry = "/opt/Cellar/t3code-cli-main/1/libexec/dist/bin.mjs"
+        for args in (["node", entry], ["node", entry, "/workspaces/project", "--port", "4000"],
+                     ["node", entry, "--port=4000"]):
+            with self.subTest(args=args):
+                self.assertTrue(CHECKS.is_server(args))
+        for command in ("--help", "--version", "pair", "auth", "thread"):
+            with self.subTest(command=command):
+                self.assertFalse(CHECKS.is_server(["node", entry, command]))
+
+    def test_cwd_first_port_equals_process_is_competing_server(self):
+        process, _ = self.start_server(serve=False, extra=["/workspaces/project", "--port=4000"])
+        with self.assertRaisesRegex(ValueError, "Competing T3 server"):
+            CHECKS.check("preflight", 0)
+        self.assertIsNone(process.poll())
+
+    def test_default_invocations_accept_other_supported_options(self):
+        entry = "/opt/t3code-cli-main/libexec/dist/bin.mjs"
+        for options in (
+            ["--dev-url", "http://127.0.0.1:5173", "--port=4000"],
+            ["--log-level", "debug", "--port=4000"],
+            ["--base-dir", "/tmp/state", "/workspaces/project", "--port=4000"],
+            ["--auto-bootstrap-project-from-cwd", "--port=4000"],
+        ):
+            with self.subTest(options=options):
+                self.assertTrue(CHECKS.is_server(["node", entry, *options]))
+
+    def test_non_server_commands_are_not_confused_with_server_arguments(self):
+        entry = "/opt/t3code-cli-main/libexec/dist/bin.mjs"
+        for options in (
+            ["status"], ["browser", "status"], ["project", "list"],
+            ["thread", "send", "serve"], ["--base-dir", "serve", "auth", "status"],
+            ["--log-level", "debug", "pair"], ["-v"], ["--completions", "zsh"],
+        ):
+            with self.subTest(options=options):
+                self.assertFalse(CHECKS.is_server(["node", entry, *options]))
+
+    def test_second_supported_invocation_fails_duplicate_server_verification(self):
+        service, prefix = self.start_server()
+        duplicate, _ = self.start_server(serve=False, extra=["/workspaces/project", "--port", "4000"])
+        with self.assertRaisesRegex(ValueError, "Competing T3 server"):
+            CHECKS.check("verify", service.pid, str(prefix))
+        self.assertIsNone(service.poll())
+        self.assertIsNone(duplicate.poll())
 
     def test_default_port_conflict_fails_without_closing_listener(self):
         with socket.socket() as listener:

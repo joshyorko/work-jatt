@@ -8,11 +8,32 @@ import sys
 
 def is_server(args):
     for index, arg in enumerate(args):
-        if re.search(r'/dist/(bin|index)\.mjs$', arg) or Path(arg).name == 't3':
-            options = [value for value in args[index + 1:] if value]
-            return not options or 'serve' in options or options[0] in {
-                '--port', '--host', '--mode', '--base-dir', '--no-browser', '--lan',
-            }
+        path = Path(arg)
+        is_t3_entry = (
+            re.search(r'/dist/(bin|index)\.mjs$', arg)
+            and 't3code-cli-main' in path.parts
+        ) or (index == 0 and path.name == 't3')
+        if not is_t3_entry:
+            continue
+        options = [value for value in args[index + 1:] if value]
+        if any(value.split('=', 1)[0] in {'--help', '-h', '--version', '-v', '-V', '--completions'}
+               for value in options):
+            return False
+        options = iter(options)
+        for value in options:
+            if value == '--':
+                return True
+            if value in {'--port', '--host', '--mode', '--base-dir', '--dev-url',
+                         '--bootstrap-fd', '--tailscale-serve-port', '--log-level'}:
+                next(options, None)
+            elif not value.startswith('-'):
+                # The first positional value is either a subcommand or the root cwd.
+                return value not in {
+                    'help', 'app', 'pair', 'auth', 'environment', 'browser', 'project',
+                    'thread', 'up', 'status', 'service', 'update', 'install', 'uninstall',
+                    'theme', 'trace', 'doctor', 'policy', 'triage', 'connect',
+                }
+        return True
     return False
 
 

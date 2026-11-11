@@ -31,7 +31,7 @@ override, service drop-in, AI account authorization, or T3 Connect setup was use
 | Missing user bus | With `XDG_RUNTIME_DIR=/tmp/issue6-no-user-bus`, the task failed with the #5 prerequisite before installing the absent T3 formula. |
 | Legacy image | Running the task directly as `vscode` with Bash as PID 1 in the legacy `:wolfi` image failed before installation and linked to #5. Its tested digest was `sha256:a6d1190169eb85acb7ffb5be7460e8c43e4d8d5c8602bbc4c081868d733caff3`. |
 | Known degraded system state | Failed units remained visible as a warning. Required managers, the user bus, and T3 worked. |
-| Automated checks | All 57 Python tests and 9 extension tests passed on the host. All 17 focused T3 tests also passed inside the disposable systemd workspace. ShellCheck, Bash syntax, and whitespace checks passed. |
+| Automated checks | November 11 regression verification passed all 63 Python tests, including 23 focused T3 tests, and 9 extension tests on the host. The initial 17 focused T3 tests passed inside the disposable systemd workspace. ShellCheck, Bash syntax, and whitespace checks passed. |
 
 The focused tests also exercise a non-systemd PID 1, duplicate setup, competing
 servers, the default-port conflict, the wrong formula process, and successful
