@@ -1,0 +1,12 @@
+{
+    "name": "Disposable T3 service validation",
+    "image": "ghcr.io/joshyorko/room-of-requirement@sha256:654fe3ba96249fb4812cf888e6179a43cc2f6c3c6b0ec1154b982645dc212fe3",
+    "remoteUser": "vscode",
+    "privileged": true,
+    "overrideCommand": false,
+    "updateRemoteUserUID": false,
+    "containerEnv": {
+        "HOMEBREW_NO_ANALYTICS": "1",
+        "HOMEBREW_NO_AUTO_UPDATE": "1"
+    }
+}

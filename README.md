@@ -1,5 +1,35 @@
 # Work Jatt
 
+## Start the T3 service
+
+Use a `wolfi-systemd` Dev Container as described in
+[#5](https://github.com/joshyorko/work-jatt/issues/5). The current legacy `:wolfi`
+image cannot run this service. This task does not change your image or run from
+the bootstrap hooks.
+
+Inside the attached container, choose **Tasks: Run Task → T3: Install and start
+service**. The task installs `joshyorko/tools/t3code-cli-main` only when missing
+and starts its Homebrew systemd user service as `vscode`. It exits after verifying
+the service's PID, user, single server process, and owned TCP listener. Repeated
+runs keep the installed formula version and a healthy service running.
+
+Run these commands inside the container as `vscode` to manage the service:
+
+```sh
+systemctl --user status sh.brew.t3code-cli-main.service
+brew services stop t3code-cli-main
+brew services restart t3code-cli-main
+```
+
+The task reports competing servers or listeners without stopping them. A degraded
+system manager, including the image's known missing `/usr/bin/agetty` warning,
+is reported without blocking setup when the required managers and user bus work.
+The service keeps running after the task exits or SSH disconnects and starts with
+the container. After a fresh container recreation, rerun the task: persistent
+HOME data alone does not preserve Homebrew kegs installed in the container layer.
+See [validation results and reproduction steps](docs/t3-service-validation.md)
+for the disposable workspace evidence and remaining manual UI checks.
+
 ## Josh Room extension
 
 This repository runs in a dev container. The lifecycle hooks in
