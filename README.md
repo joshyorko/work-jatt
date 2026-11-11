@@ -2,10 +2,10 @@
 
 ## Start the T3 service
 
-Use a `wolfi-systemd` Dev Container as described in
-[#5](https://github.com/joshyorko/work-jatt/issues/5). The current legacy `:wolfi`
-image cannot run this service. This task does not change your image or run from
-the bootstrap hooks.
+The devcontainer selects the verified `wolfi-systemd` image, pinned to its tested
+digest. Existing containers using the legacy `:wolfi` image need recreation
+before running this task. Preserve their HOME volume when recreating them.
+T3 starts only through the manual task, not the bootstrap hooks.
 
 Inside the attached container, choose **Tasks: Run Task → T3: Install and start
 service**. The task installs `joshyorko/tools/t3code-cli-main` only when missing

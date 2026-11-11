@@ -1,9 +1,9 @@
 # T3 service validation
 
-Validated on November 10, 2026, in the disposable `work-jatt-issue6-proof`
-workspace. The live Work-Jatt workspace and its image configuration were not
-changed. The disposable workspace was stopped after validation; its volumes
-were preserved.
+Initial validation ran on November 10, 2026, in the disposable
+`work-jatt-issue6-proof` workspace. The devcontainer now selects that tested
+image by digest. The live workspace was not rebuilt. The disposable workspace
+was stopped after validation; its volumes were preserved.
 
 ## Environment
 
