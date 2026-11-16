@@ -22,6 +22,7 @@ run_script install-review-tools.sh
 run_script install-review-package.sh
 run_script build-fuse2fs.sh
 run_script stage-josh-room.sh
+run_script stage-automation-vscode.sh
 python3 "${SCRIPT_DIR}/stage-headroom-extension.py"
 
 # Keep proxy authentication separate from each client's OpenAI login.
