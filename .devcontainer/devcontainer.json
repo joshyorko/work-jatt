@@ -27,6 +27,7 @@
         "vscode": {
             "extensions": [
                 "/home/vscode/.cache/josh-room/josh-room.vsix",
+                "/home/vscode/.cache/automation-vscode/automation-vscode.vsix",
                 "/home/vscode/.cache/headroom/work-jatt-headroom.vsix"
             ]
         }

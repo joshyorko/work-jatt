@@ -7,6 +7,7 @@ if /bin/bash "${SCRIPT_DIR}/check-review-runtime.sh"; then
   /bin/bash "${SCRIPT_DIR}/configure-headroom.sh"
   /bin/bash "${SCRIPT_DIR}/prepare-vscode-extensions.sh"
   /bin/bash "${SCRIPT_DIR}/stage-josh-room.sh"
+  /bin/bash "${SCRIPT_DIR}/stage-automation-vscode.sh"
   python3 "${SCRIPT_DIR}/stage-headroom-extension.py"
   echo 'Review runtime is ready.'
   exit 0

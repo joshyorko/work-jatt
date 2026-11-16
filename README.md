@@ -106,6 +106,59 @@ The `$schema` entry in `devcontainer.json` points to
 only accepts Marketplace extension IDs, while Devsy also accepts the staged
 VSIX filesystem path used here.
 
+## Automation VS Code extension
+
+The pin is [2.20.29, a scoped dogfood prerelease](https://github.com/automation-control-plane/automation-vscode/releases/tag/automation-vscode-v2.20.29),
+selected explicitly rather than through GitHub's latest stable release.
+The Linux x64 asset and its published checksum were independently downloaded
+and verified, including the extension identity and target platform. See
+[verification evidence](docs/automation-vscode-validation.md).
+
+Automation uses the same Devsy lifecycle as Josh Room. Both fresh creation and
+ready-runtime startup verify the pinned GitHub release VSIX and atomically stage
+`/home/vscode/.cache/automation-vscode/automation-vscode.vsix`. Devsy installs
+that stable path after its VS Code server starts. Josh Room and the bundled
+Headroom setup extension remain installed separately; HOME volumes, runtime
+settings, and authentication are unchanged. This does not use Marketplace IDs.
+
+After verifying publication, update using the exact release tag and the actual
+checksum manifest asset name supplied by the release owner:
+
+```sh
+bash .vscode/update-automation-vscode.sh automation-vscode-v2.20.29 automation-vscode-2.20.29-SHA256SUMS.txt
+```
+
+The updater matches exactly one Linux x64 asset checksum in the manifest,
+verifies the downloaded VSIX, and only then replaces the pin. Failed downloads,
+missing/duplicate checksums, and mismatched bytes preserve the previous pin and
+cached VSIX files. Valid cached bytes avoid downloads; a damaged stable copy is
+repaired from the verified version cache. `AUTOMATION_VSCODE_CACHE_DIR` overrides
+the current user's default `~/.cache/automation-vscode` cache directory.
+The pinned platform is Linux x64; other architectures fail before downloading.
+
+The pinned release is publicly downloadable. Downloads first try the public asset URL,
+then use existing `gh` authentication with access to
+`automation-control-plane/automation-vscode`. No token is embedded in the pin,
+command arguments, or workspace settings, and no interactive login is launched.
+A fresh container without access needs existing approved GitHub authentication
+before staging can succeed. A verified cache works without network access.
+
+To install manually inside the attached Linux x64 devcontainer:
+
+```sh
+sh .vscode/install-automation-vscode.sh
+```
+
+This stages verified bytes, prepares the existing extension directories, and
+tries `code-insiders` then `code`. It requires the exact
+`automation-control-plane.automation-vscode@VERSION` entry from a successful
+`--list-extensions --show-versions` call before reporting success. Reload the
+window afterward. Running the helper on a host targets that host's editor.
+
+Offline coverage: `python3 -m unittest discover -s tests -p test_automation_vscode.py -v`.
+These fixtures do not establish live Devsy installation, GUI activation, debugger
+behavior, or compatibility of bundled native tools with the Wolfi runtime.
+
 ## Headroom authentication
 
 Headroom now requires `X-Headroom-Proxy-Token` in addition to each client's

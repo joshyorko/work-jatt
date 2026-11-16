@@ -27,6 +27,8 @@ class JoshRoomUpdateTests(unittest.TestCase):
         # Fixture checks must never bootstrap tools on the workstation.
         (self.root / ".devcontainer/scripts/bootstrap-review.sh").write_text(
             "#!/usr/bin/env bash\nexit 97\n")
+        (self.root / ".devcontainer/scripts/stage-automation-vscode.sh").write_text(
+            "#!/usr/bin/env bash\nexit 0\n")
         self.pin = self.root / ".devcontainer/josh-room.env"
         self.original_pin = self.pin.read_bytes()
         self.cache = self.root / "cache"
