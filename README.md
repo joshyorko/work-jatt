@@ -8,27 +8,49 @@ before running this task. Preserve their HOME volume when recreating them.
 T3 starts only through the manual task, not the bootstrap hooks.
 
 Inside the attached container, choose **Tasks: Run Task → T3: Install and start
-service**. The task installs `joshyorko/tools/t3code-cli-main` only when missing
-and starts its Homebrew systemd user service as `vscode`. It exits after verifying
-the service's PID, user, single server process, and owned TCP listener. Repeated
-runs keep the installed formula version and a healthy service running.
+service**. The task downloads the official installer from
+<https://t3.codes/install.sh> when `~/.local/bin/t3` is missing, then runs
+`t3 service install` and `t3 service status` as `vscode`. Upstream owns runtime
+installation, readiness checks, service updates, and recovery. Repeated runs
+retain the installed CLI version and repair its service when needed.
 
-Run these commands inside the container as `vscode` to manage the service:
+Fresh installs default to the official **nightly** channel, matching the existing
+T3 nightly data rather than downgrading it to stable. To choose stable for a new
+installation, run `T3CODE_CHANNEL=stable bash .vscode/install-t3-service.sh`.
+For an installed CLI, change channel explicitly with `t3 update --channel stable`;
+upstream may require confirmation or an explicit downgrade option.
+
+Run these commands inside the container as `vscode`:
 
 ```sh
-systemctl --user status sh.brew.t3code-cli-main.service
-brew services stop t3code-cli-main
-brew services restart t3code-cli-main
+~/.local/bin/t3 service status
+~/.local/bin/t3 update
+~/.local/bin/t3 service restart
+~/.local/bin/t3 service uninstall
 ```
 
-The task reports competing servers or listeners without stopping them. A degraded
-system manager, including the image's known missing `/usr/bin/agetty` warning,
-is reported without blocking setup when the required managers and user bus work.
-The service keeps running after the task exits or SSH disconnects and starts with
-the container. After a fresh container recreation, rerun the task: persistent
-HOME data alone does not preserve Homebrew kegs installed in the container layer.
-See [validation results and reproduction steps](docs/t3-service-validation.md)
-for the disposable workspace evidence and remaining manual UI checks.
+Restarting interrupts active turns and terminals. Finish work before restarting
+or switching an existing service. If the retired Homebrew service is running,
+the task stops before installation and prints the migration prerequisite. After
+finishing its work, run:
+
+```sh
+brew services stop t3code-cli-main
+brew uninstall t3code-cli-main
+bash .vscode/install-t3-service.sh
+```
+
+The task preserves T3 data and existing `service.env` settings. If no telemetry
+setting exists, it adds `T3CODE_TELEMETRY_ENABLED=false` to
+`${T3CODE_HOME:-$HOME/.t3}/service.env`. Existing settings are retained. Changes to
+that file apply on the next service start. The CLI and downloaded runtimes live
+in the persisted home volume and survive container recreation.
+
+A degraded system manager, including the image's known missing `/usr/bin/agetty`
+warning, is reported without blocking setup when the required managers and user
+bus work. The service keeps running after the task exits or SSH disconnects and
+starts with the container. See [validation notes](docs/t3-service-validation.md)
+for offline checks and the unverified runtime boundary.
 
 ## Josh Room extension
 
