@@ -1,0 +1,11 @@
+{
+  "name": "Work-Jatt Omarchy Webtop",
+  "dockerComposeFile": "compose.yaml",
+  "service": "webtop",
+  "workspaceFolder": "/workspaces/work-jatt",
+  "remoteUser": "kdlocpanda",
+  "updateRemoteUserUID": false,
+  "overrideCommand": false,
+  "forwardPorts": [3000, 3001],
+  "shutdownAction": "stopCompose"
+}
