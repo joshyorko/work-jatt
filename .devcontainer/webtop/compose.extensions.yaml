@@ -1,0 +1,8 @@
+services:
+  webtop:
+    volumes:
+      - type: bind
+        source: ./extensions
+        target: /webtop-extensions
+        bind:
+          create_host_path: false
