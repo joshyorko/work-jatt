@@ -43,7 +43,7 @@ git status --short -- "$profile/extensions"
 
 Edit `/webtop-extensions` in the desktop or
 `.devcontainer/webtop/extensions/` in the checkout. For example, add a PNG in
-`backgrounds/tokyo-night/`, run `webtop-link-wallpapers` in the desktop terminal
+`backgrounds/tokyo-night/`, run `webtop-link-extensions` in the desktop terminal
 and select it with `omarchy-theme-bg-switcher`. Existing filenames can be
 edited in place. Reopen the picker to see new bytes. Keep the bind enabled
 when the active wallpaper lives in it. Git sees these changes and the named
