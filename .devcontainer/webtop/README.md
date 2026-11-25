@@ -1,7 +1,8 @@
 # Work-Jatt Webtop
 
 This opt-in profile runs Omarchy Webtop on a Linux Docker host with an
-accessible DRM render node under `/dev/dri`. It pulls the public Webtop image
+accessible DRM render node under `/dev/dri` and a standard clone of Work-Jatt.
+It pulls the public Webtop image
 if missing. The default tag is `ghcr.io/joshyorko/webtop-os:work-jatt-dogfood`.
 The dogfood tag is pending publication. Set `WEBTOP_IMAGE` to a locally loaded
 candidate tag for prepublication testing.
@@ -12,8 +13,20 @@ From the Work-Jatt checkout on the Docker host:
 
 ```bash
 profile=.devcontainer/webtop
-test -e "$profile/.env" || install -m 0600 "$profile/.env.example" "$profile/.env"
-export COMPOSE_ENV_FILES="$PWD/$profile/.env"
+checkout=$(pwd -P)
+checkout_id=$(printf '%s' "$checkout" | sha256sum | cut -c1-12)
+if [ ! -e "$profile/.env" ]; then
+  (
+    umask 077
+    set -C
+    {
+      printf 'WEBTOP_PROJECT_NAME=work-jatt-webtop-%s\n' "$checkout_id"
+      printf 'WEBTOP_WORKSPACE_DIR=%s\n' "$checkout"
+      printf 'WEBTOP_PUID=%s\nWEBTOP_PGID=%s\n' "$(id -u)" "$(id -g)"
+      cat "$profile/.env.example"
+    } > "$profile/.env"
+  )
+fi
 docker compose -f "$profile/compose.yaml" up -d
 ```
 
@@ -21,10 +34,15 @@ Open `http://localhost:13000` or `https://localhost:13001` on that host.
 For a remote Docker host, use SSH local port forwarding to those loopback
 ports. Edit the private `.env` to change the image, ports, desktop alias or
 Git defaults. Run the same `up` command again to apply the changes. Pull
-explicitly when you want a newer image at the same tag. The named volume
-`work-jatt-webtop-config` retains `/config` across replacements. Keep its
-name fixed for a given profile and stop that profile before switching
-launchers. Set `WEBTOP_CONFIG_VOLUME` to a unique name for a disposable test.
+explicitly when you want a newer image at the same tag. Compose scopes the
+`/config` volume to the project in `WEBTOP_PROJECT_NAME`. Keep that name
+fixed across replacements and stop the profile before switching launchers.
+
+For a second checkout or a disposable test, run the setup in that checkout
+and set different HTTP and HTTPS ports in its `.env` before launch. If you
+already made a profile `.env`, add the checkout-specific project name and
+absolute workspace directory shown in the setup. Update the workspace
+directory if you move the checkout.
 
 Keep `WEBTOP_PUID` and `WEBTOP_PGID` aligned with the checkout owner and
 stable for the life of the volume. Dev Containers enters as `abc`, the image's
@@ -62,16 +80,20 @@ config="$PWD/$profile/devcontainer.local.json"
 ### Dev Containers and Devsy
 
 In VS Code, select **Work-Jatt Webtop** from **Dev Containers: Reopen in
-Container**. For the Dev Container CLI, run from the same launch shell used
-above. Set `config` to the private profile when using the live bind.
+Container**. Compose publishes the loopback ports configured above. The
+private extension config can be selected by the Dev Container CLI or Devsy.
+Run from the Work-Jatt checkout and set `config` to that file when using the
+live bind.
 
 ```bash
 config=${config:-$PWD/$profile/devcontainer.json}
 devcontainer up --workspace-folder "$PWD" --config "$config"
 devcontainer exec --workspace-folder "$PWD" --config "$config" sh -ec '
   test "$(getent passwd abc | cut -d: -f6)" = /config
-  test "$(id -u)" = "$(id -u abc)"
+  test "$(id -u)" = "${PUID:-1000}"
   test "$(id -u "${WEBTOP_USER:-kdlocpanda}")" = "$(id -u)"
+  test -w /config
+  test "$(git config --file /etc/webtop-gitconfig user.name)" = "$WEBTOP_GIT_NAME"
   test "$(git rev-parse --show-toplevel)" = /workspaces/work-jatt
   test -w .
   ls /dev/dri/renderD*
@@ -80,11 +102,16 @@ devcontainer exec --workspace-folder "$PWD" --config "$config" sh -ec '
 
 After changing settings, use `devcontainer up --remove-existing-container`
 with the same workspace and config arguments to recreate the container.
-From the launch shell, probe on the configured host port with
-`curl -fsS -o /dev/null http://127.0.0.1:13000/` after startup.
+From the launch shell, probe the configured host port after startup:
 
-Use an existing local Docker provider named `docker` for Devsy. Run these
-commands from the launch shell with `COMPOSE_ENV_FILES` exported:
+```bash
+endpoint=$(docker compose -f "$profile/compose.yaml" port webtop 3000)
+curl -fsS -o /dev/null "http://$endpoint/"
+```
+
+Use an existing local Docker provider named `docker` for Devsy. Set a unique
+workspace ID per checkout. To use the live bind, pass the private profile
+path instead of `id:webtop`. Add `--recreate` to apply settings changes.
 
 ```bash
 devsy --provider docker workspace up --id work-jatt-webtop \
@@ -92,8 +119,11 @@ devsy --provider docker workspace up --id work-jatt-webtop \
 devsy --provider docker workspace ssh work-jatt-webtop \
   --workdir /workspaces/work-jatt --command '
     set -e
-    test "$(id -u)" = "$(id -u abc)"
+    test "$(id -u)" = "${PUID:-1000}"
+    test "$(id -u "${WEBTOP_USER:-kdlocpanda}")" = "$(id -u)"
     test "$(getent passwd abc | cut -d: -f6)" = /config
+    test -w /config
+    test "$(git config --file /etc/webtop-gitconfig user.name)" = "$WEBTOP_GIT_NAME"
     test "$(git rev-parse --show-toplevel)" = /workspaces/work-jatt
     test -w .
     ls /dev/dri/renderD*

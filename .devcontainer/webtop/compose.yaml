@@ -1,4 +1,4 @@
-name: work-jatt-webtop
+name: ${WEBTOP_PROJECT_NAME:?Set WEBTOP_PROJECT_NAME in the Webtop profile .env}
 
 services:
   webtop:
@@ -22,7 +22,7 @@ services:
     shm_size: 4gb
     volumes:
       - type: bind
-        source: ../..
+        source: ${WEBTOP_WORKSPACE_DIR:?Set WEBTOP_WORKSPACE_DIR in the Webtop profile .env}
         target: /workspaces/work-jatt
         bind:
           create_host_path: false
@@ -34,4 +34,3 @@ services:
 
 volumes:
   work-jatt-webtop-config:
-    name: ${WEBTOP_CONFIG_VOLUME:-work-jatt-webtop-config}

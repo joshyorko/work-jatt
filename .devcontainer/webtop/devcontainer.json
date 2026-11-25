@@ -6,9 +6,5 @@
   "remoteUser": "abc",
   "updateRemoteUserUID": false,
   "overrideCommand": false,
-  "shutdownAction": "stopCompose",
-  "forwardPorts": [
-    3000,
-    3001
-  ]
+  "shutdownAction": "stopCompose"
 }
