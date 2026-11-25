@@ -1,0 +1,8 @@
+services:
+  webtop:
+    volumes:
+      - type: bind
+        source: ${WEBTOP_WORKSPACE_DIR:?Set WEBTOP_WORKSPACE_DIR in the Webtop profile .env}/.devcontainer/webtop/extensions
+        target: /webtop-extensions
+        bind:
+          create_host_path: false

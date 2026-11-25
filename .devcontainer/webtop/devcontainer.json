@@ -1,0 +1,10 @@
+{
+  "name": "Work-Jatt Webtop",
+  "dockerComposeFile": "compose.yaml",
+  "service": "webtop",
+  "workspaceFolder": "/workspaces/work-jatt",
+  "remoteUser": "abc",
+  "updateRemoteUserUID": false,
+  "overrideCommand": false,
+  "shutdownAction": "stopCompose"
+}
