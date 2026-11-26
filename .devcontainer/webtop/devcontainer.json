@@ -1,10 +1,12 @@
 {
   "name": "Work-Jatt Webtop",
+  "initializeCommand": ["bash", "${localWorkspaceFolder}/.devcontainer/webtop/initialize.sh", "${localWorkspaceFolder}"],
   "dockerComposeFile": "compose.yaml",
   "service": "webtop",
   "workspaceFolder": "/workspaces/work-jatt",
   "remoteUser": "abc",
   "updateRemoteUserUID": false,
+  "forwardPorts": [3000],
   "overrideCommand": false,
   "shutdownAction": "stopCompose"
 }

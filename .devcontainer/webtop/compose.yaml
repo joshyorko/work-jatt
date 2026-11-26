@@ -2,7 +2,7 @@ name: ${WEBTOP_PROJECT_NAME:?Set WEBTOP_PROJECT_NAME in the Webtop profile .env}
 
 services:
   webtop:
-    image: ${WEBTOP_IMAGE:-ghcr.io/joshyorko/webtop-os:work-jatt-dogfood}
+    image: ${WEBTOP_IMAGE:-ghcr.io/joshyorko/webtop-os:latest}
     pull_policy: missing
     environment:
       PUID: ${WEBTOP_PUID:-1000}
@@ -12,6 +12,8 @@ services:
       WEBTOP_GIT_EMAIL: ${WEBTOP_GIT_EMAIL:-joshyorko@users.noreply.github.com}
       TITLE: Work-Jatt Webtop
       PIXELFLUX_WAYLAND: "true"
+      DRINODE: ${WEBTOP_RENDER_NODE:-}
+      LIBGL_ALWAYS_SOFTWARE: ${WEBTOP_SOFTWARE_RENDERING:-0}
       SELKIES_MICROPHONE_ENABLED: ${WEBTOP_MICROPHONE_ENABLED:-false}
       SELKIES_MICROPHONE_ON_START: "false"
     devices:

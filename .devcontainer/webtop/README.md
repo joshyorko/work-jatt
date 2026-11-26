@@ -3,9 +3,25 @@
 This opt-in profile runs Omarchy Webtop on a Linux Docker host with an
 accessible DRM render node under `/dev/dri` and a standard clone of Work-Jatt.
 It pulls the public Webtop image
-if missing. The default tag is `ghcr.io/joshyorko/webtop-os:work-jatt-dogfood`.
-The dogfood tag is pending publication. Set `WEBTOP_IMAGE` to a locally loaded
-candidate tag for prepublication testing.
+if missing. The default tag is `ghcr.io/joshyorko/webtop-os:latest`.
+Set `WEBTOP_IMAGE` to a specific published digest or a locally loaded candidate
+tag to select another image.
+
+On a GPU-less Linux VM, enable its `vkms` kernel module and set
+`WEBTOP_RENDER_NODE` to the resulting `/dev/dri/card*` device in the private
+profile `.env`, with `WEBTOP_SOFTWARE_RENDERING=1`. The VM needs a working DRM
+allocator even when Mesa renders on the CPU; an HTTP response alone does not
+prove that the nested Hyprland desktop started.
+
+Harvester's `default/ubuntu-docker-webtop-v1` cloud-init template extends
+`default/ubuntu-docker` with persistent `vkms` and `vgem` module loading.
+It uses `bind9-dnsutils` on current Ubuntu images and fits KubeVirt's 2 KiB
+inline user-data limit. The profile's `initializeCommand` creates a private
+`.env` on first launch and automatically selects the VKMS card for software
+rendering when present. Existing `.env` settings are preserved.
+Devsy selects this template
+with `HARVESTER_CLOUD_INIT_TEMPLATE=default/ubuntu-docker-webtop-v1`; cloud-init
+changes apply to newly created VMs, not existing machines.
 
 ### Launch and change settings
 
@@ -78,6 +94,9 @@ config="$PWD/$profile/devcontainer.local.json"
 ```
 
 ### Dev Containers and Devsy
+
+The profile creates its private `.env` automatically on first launch and
+preserves existing settings. VS Code forwards container port 3000.
 
 In VS Code, select **Work-Jatt Webtop** from **Dev Containers: Reopen in
 Container**. Compose publishes the loopback ports configured above. The
